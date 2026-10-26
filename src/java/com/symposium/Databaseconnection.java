@@ -13,9 +13,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class Databaseconnection {
-    private static final String URL = "jdbc:mysql://localhost:3306/symposium_db";
-    private static final String USER = "root";      // Replace with your MySQL username
-    private static final String PASSWORD = "Muthu123!@#";      // Replace with your MySQL password
+    private static final String URL = "jdbc:mysql://mysql-30f5004a-muthuselvavenkatesh-6306.e.aivencloud.com:27960/defaultdb?useSSL=true&requireSSL=true";
+    private static final String USER = "avnadmin";      // Replace with your MySQL username
+    private static final String PASSWORD = System.getenv("DB_PASSWORD");      // Replace with your MySQL password
 
     public static Connection getConnection() throws SQLException {
         try {
