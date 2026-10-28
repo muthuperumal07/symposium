@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scheduled Events - TechSymp '26</title>
+    <title>TechSymp '26 - Scheduled Events</title>
     <style>
         :root {
             --primary: #4f46e5;
@@ -29,12 +29,12 @@
             padding: 2.5rem 2rem;
             text-align: center;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            position: relative;
         }
 
         header h1 {
             margin: 0;
             font-size: 2.5rem;
+            letter-spacing: 1px;
         }
 
         header p {
@@ -43,131 +43,113 @@
             font-size: 1.1rem;
         }
 
-        .nav-link {
-            position: absolute;
-            top: 25px;
-            right: 30px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .nav-links {
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-links a {
+            color: var(--primary);
             text-decoration: none;
             font-weight: 600;
-            transition: background 0.2s;
         }
 
-        .nav-link:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .container {
-            max-width: 1100px;
-            margin: 2.5rem auto;
-            padding: 0 1.5rem;
+        .nav-links a:hover {
+            text-decoration: underline;
         }
 
         .events-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            grid-template-columns: 1fr;
             gap: 1.5rem;
         }
 
         .event-card {
             background: var(--card-bg);
-            padding: 1.75rem;
-            border-radius: 12px;
+            padding: 1.5rem;
+            border-radius: 10px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             border-left: 5px solid var(--primary);
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s;
         }
 
         .event-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(-3px);
         }
 
         .event-card h3 {
-            margin: 0 0 0.75rem 0;
+            margin: 0 0 0.5rem 0;
             color: var(--text-main);
-            font-size: 1.35rem;
+            font-size: 1.25rem;
         }
 
         .event-card p {
             margin: 0;
             color: var(--text-muted);
-            line-height: 1.6;
+            line-height: 1.5;
         }
 
         .no-events {
-            grid-column: 1 / -1;
-            background: white;
-            text-align: center;
-            padding: 3rem;
-            border-radius: 12px;
+            background: var(--card-bg);
             color: var(--text-muted);
             font-style: italic;
+            text-align: center;
+            padding: 3rem;
+            border-radius: 10px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
-        .delete-btn {
-    display: inline-block;
-    margin-top: 1rem;
-    background-color: #fee2e2;
-    color: #dc2626;
-    padding: 0.4rem 0.8rem;
-    border-radius: 6px;
-    text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 600;
-    transition: background 0.2s;
-}
-.delete-btn:hover {
-    background-color: #fecaca;
-}
     </style>
 </head>
 <body>
 
     <header>
-        <a href="events.jsp" class="nav-link">+ Add New Event</a>
-        <h1>? Scheduled Symposium Events</h1>
-        <p>Browse all technical and non-technical events lined up for TechSymp '26</p>
+        <h1>Scheduled Events</h1>
+        <p>Explore all active competitions and technical challenges at TechSymp '26</p>
     </header>
 
     <div class="container">
+        <div class="nav-links">
+            <a href="index.jsp">&larr; Back to Home</a> &nbsp;|&nbsp; <a href="events.jsp">+ Publish New Event</a>
+        </div>
+
         <div class="events-grid">
             <%
                 try (Connection conn = Databaseconnection.getConnection();
-     Statement stmt = conn.createStatement()) {
-    
-    // Automatically creates the table if it's missing!
-    stmt.executeUpdate("CREATE TABLE IF NOT EXISTS events (" +
-                       "id INT AUTO_INCREMENT PRIMARY KEY, " +
-                       "title VARCHAR(255) NOT NULL, " +
-                       "description TEXT NOT NULL)");
-
-    // Your original query
-    ResultSet rs = stmt.executeQuery("SELECT title, description FROM events ORDER BY id DESC");
-     {
+                     Statement stmt = conn.createStatement()) {
                     
+                    // 1. Ensure table exists automatically
+                    stmt.executeUpdate("CREATE TABLE IF NOT EXISTS events (" +
+                                       "id INT AUTO_INCREMENT PRIMARY KEY, " +
+                                       "title VARCHAR(255) NOT NULL, " +
+                                       "description TEXT NOT NULL)");
+
+                    // 2. Query and display all events
+                    ResultSet rs = stmt.executeQuery("SELECT title, description FROM events ORDER BY id DESC");
                     boolean hasEvents = false;
+                    
                     while(rs.next()) {
                         hasEvents = true;
             %>
-                      <div class="event-card">
-                        <h3><%= rs.getString("title") %></h3>
-                        <p><%= rs.getString("description") %></p>
-                        <a href="deleteEvent?id=<%= rs.getInt("id") %>" class="delete-btn" onclick="return confirm('Are you sure you want to delete this event?');">Delete Event</a>
-                       </div>
+                        <div class="event-card">
+                            <h3><%= rs.getString("title") %></h3>
+                            <p><%= rs.getString("description") %></p>
+                        </div>
             <%
                     }
+                    
                     if(!hasEvents) {
             %>
-                        <div class="no-events">No events scheduled yet. Use the "+ Add New Event" button to publish one!</div>
+                        <div class="no-events">No events scheduled yet. Use the "+ Publish New Event" button to add one!</div>
             <%
                     }
                 } catch(Exception e) {
             %>
-                <div class="no-events" style="color: red;">Error loading scheduled events: <%= e.getMessage() %></div>
+                    <div class="no-events" style="color: red;">Error loading scheduled events: <%= e.getMessage() %></div>
             <%
                 }
             %>
