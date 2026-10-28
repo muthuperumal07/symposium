@@ -160,7 +160,7 @@
 <body>
 
     <header>
-        <h1> TechSymp '26 Portal</h1>
+        <h1>TechSymp '26 Portal</h1>
         <p>Explore technical & non-technical events and register your team</p>
     </header>
 
@@ -168,7 +168,7 @@
         <!-- Left Column: Form to Add Event -->
         <div class="card">
             <h2>Add New Event</h2>
-            <form action="addEvent" method="POST">
+            <form action="events.jsp" method="POST">
                 <div class="form-group">
                     <label>Event Title</label>
                     <input type="text" name="title" placeholder="e.g., Code Debugging" required>
@@ -187,10 +187,26 @@
             <div class="events-grid">
                 <%
                     try (Connection conn = Databaseconnection.getConnection();
-                         Statement stmt = conn.createStatement();
-                         ResultSet rs = stmt.executeQuery("SELECT title, description FROM events ORDER BY id DESC")) {
+                         Statement stmt = conn.createStatement()) {
                         
+                        // 1. Ensure table exists automatically
+                        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS events (" +
+                                           "id INT AUTO_INCREMENT PRIMARY KEY, " +
+                                           "title VARCHAR(255) NOT NULL, " +
+                                           "description TEXT NOT NULL)");
+
+                        // 2. Insert new event if form was submitted
+                        String title = request.getParameter("title");
+                        String description = request.getParameter("description");
+                        if (title != null && !title.trim().isEmpty()) {
+                            String insertSql = "INSERT INTO events (title, description) VALUES ('" + title.replace("'", "''") + "', '" + description.replace("'", "''") + "')";
+                            stmt.executeUpdate(insertSql);
+                        }
+
+                        // 3. Query and display all events
+                        ResultSet rs = stmt.executeQuery("SELECT title, description FROM events ORDER BY id DESC");
                         boolean hasEvents = false;
+                        
                         while(rs.next()) {
                             hasEvents = true;
                 %>
@@ -200,6 +216,7 @@
                             </div>
                 <%
                         }
+                        
                         if(!hasEvents) {
                 %>
                             <div class="no-events">No events added yet. Use the form to publish your first event!</div>

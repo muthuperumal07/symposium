@@ -137,8 +137,17 @@
         <div class="events-grid">
             <%
                 try (Connection conn = Databaseconnection.getConnection();
-                     Statement stmt = conn.createStatement();
-                     ResultSet rs = stmt.executeQuery("SELECT id, title, description FROM events ORDER BY id DESC")) {
+     Statement stmt = conn.createStatement()) {
+    
+    // Automatically creates the table if it's missing!
+    stmt.executeUpdate("CREATE TABLE IF NOT EXISTS events (" +
+                       "id INT AUTO_INCREMENT PRIMARY KEY, " +
+                       "title VARCHAR(255) NOT NULL, " +
+                       "description TEXT NOT NULL)");
+
+    // Your original query
+    ResultSet rs = stmt.executeQuery("SELECT title, description FROM events ORDER BY id DESC");
+     {
                     
                     boolean hasEvents = false;
                     while(rs.next()) {
