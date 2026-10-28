@@ -9,6 +9,8 @@
         :root {
             --primary: #4f46e5;
             --primary-dark: #4338ca;
+            --danger: #ef4444;
+            --danger-dark: #dc2626;
             --bg-color: #f8fafc;
             --card-bg: #ffffff;
             --text-main: #1e293b;
@@ -75,6 +77,9 @@
             border-radius: 10px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             border-left: 5px solid var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
             transition: transform 0.2s;
         }
 
@@ -82,16 +87,32 @@
             transform: translateY(-3px);
         }
 
-        .event-card h3 {
+        .event-info h3 {
             margin: 0 0 0.5rem 0;
             color: var(--text-main);
             font-size: 1.25rem;
         }
 
-        .event-card p {
+        .event-info p {
             margin: 0;
             color: var(--text-muted);
             line-height: 1.5;
+        }
+
+        .btn-delete {
+            background-color: var(--danger);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-delete:hover {
+            background-color: var(--danger-dark);
         }
 
         .no-events {
@@ -128,16 +149,28 @@
                                        "title VARCHAR(255) NOT NULL, " +
                                        "description TEXT NOT NULL)");
 
-                    // 2. Query and display all events
-                    ResultSet rs = stmt.executeQuery("SELECT title, description FROM events ORDER BY id DESC");
+                    // 2. Handle deletion if requested
+                    String deleteId = request.getParameter("deleteId");
+                    if (deleteId != null && !deleteId.trim().isEmpty()) {
+                        stmt.executeUpdate("DELETE FROM events WHERE id = " + deleteId);
+                    }
+
+                    // 3. Query and display all events including their id
+                    ResultSet rs = stmt.executeQuery("SELECT id, title, description FROM events ORDER BY id DESC");
                     boolean hasEvents = false;
                     
                     while(rs.next()) {
                         hasEvents = true;
             %>
                         <div class="event-card">
-                            <h3><%= rs.getString("title") %></h3>
-                            <p><%= rs.getString("description") %></p>
+                            <div class="event-info">
+                                <h3><%= rs.getString("title") %></h3>
+                                <p><%= rs.getString("description") %></p>
+                            </div>
+                            <form action="scheduleevents.jsp" method="POST" onsubmit="return confirm('Are you sure you want to delete this event?');">
+                                <input type="hidden" name="deleteId" value="<%= rs.getInt("id") %>">
+                                <button type="submit" class="btn-delete">Delete</button>
+                            </form>
                         </div>
             <%
                     }
